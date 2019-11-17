@@ -1,0 +1,53 @@
+---
+title: "DATA 607 Final Project Proposal"
+author: "Samuel I Kigamba"
+date: "November 17, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+--------------------------------------------------------------------------------
+
+\clearpage
+
+
+#### DATA 607 Final Project Proposal
+
+I want to perform a study on health specifically wellbeing and population density.
+I want to take advantage of the many data sources currently out there especially 
+on the world bank and other international development agencies sites.
+With so much data, it makes sense to use some sort of relational data base such as
+MySQL to store the data.
+
+Data can also be collected using an API for the different data sources (sites)
+or downloaded directly into .cvs format files.
+
+The data will most likely come from the sources in these following links: 
+https://datacatalog.worldbank.org/dataset/health-nutrition-and-population-statistics 
+
+The research question that I would like to address is
+- is there a relationship between wellbeing and population density?
+
+In answering this question, I endeavor to understand the relationship between health
+and well being in relation to population densities.
+
+I will carry out the project using a typical data science workflow presented in 
+DATA 607 specifically in the Data Science for Business reading text.
+
+Using API: http://data.worldbank.org/developers
+
+Using csv: http://databank.worldbank.org/data/download/hnp_stats_csv.zip
+
+Using Excel: http://databank.worldbank.org/data/download/hnp_stats_csv.zip
+
+Using Query Tools: http://databank.worldbank.org/data/views/variableselection/selectvariables.aspx?source=health-nutrition-and-population-statistics
+
+
+
+--------------------------------------------------------------------------------
+
+\clearpage
