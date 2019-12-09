@@ -2,7 +2,9 @@
 title: "DATA 607 Final Project"
 author: "Samuel I Kigamba"
 date: "December 8, 2019"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -10,84 +12,127 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Final Project Checklist
-To receive full credit, you‚????ll need to deliver on all of the items in the checklist below. Please read carefully through this checklist
+To receive full credit, you'll need to deliver on all of the items in the checklist below. Please read carefully through this checklist
 before you make your project proposal. You are (within these checklist constraints) strongly urged to limit scope and make the
 necessary simplifying assumptions so that you can deliver your work on time!
 
 # Section 1 - Introduction
 
 
-##ÔÅØ Proposal describes your motivation for performing this analysis.
+## Proposal describes your motivation for performing this analysis.
 
 Goal:
-My objective in this project is seeking to understand the relationship between population growth and the crime rates in the United States between the year 1994 to 2013 and to comment and conclude on the overal pattern.
+My objective in this project is seeking to understand the relationship between population growth and the crime rates in the United States between the year 1994 to 2018 and to comment and conclude on the overal pattern.
 
 
-#ÔÅØ Proposal describes likely data sources.
+# Proposal describes likely data sources.
 
  To analyze the crime rates in the US for the period from 1994 to 2013, we will use the data set provided by the FBI. 
  See link: https://ucr.fbi.gov/crime-in-the-u.s/2013/crime-in-the-u.s.-2013/tables/1tabledatadecoverviewpdf/table_1_crime_in_the_united_states_by_volume_and_rate_per_100000_inhabitants_1994-2013.xls
  
  
 
-#ÔÅØ Your project has a recognizable ‚????data science workflow,
-‚??ù such as the OSEMN workflow or Hadley Wickham‚????s Grammar of Data Science. [Example: First the data is acquired, then necessary transformations and clean-up are performed, then the analysis and presentation work is performed]
+# Your project has a recognizable data science workflow,
+such as the OSEMN workflow or Hadley Wickham's Grammar of Data Science. [Example: First the data is acquired, then necessary transformations and clean-up are performed, then the analysis and presentation work is performed]
+
+# Section 2
 
 ## Data Acquisition
-I downloaded data for the period 1994 - 2018 and saved it as a .csv file in my local drive and later uploaded it into my github directory for universal accessibility.
+I downloaded data for the period 1994 - 2018 and saved it as a .csv file in my local drive and later uploaded it into my github directory for accessibility.
 
-load data
+####load libraries
 
-```{r}
-crime_data <- read_csv("CrimeData.csv")
-head(crime_data)
+```{r, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(XML)
+library(RCurl)
+library(knitr)
+library(dplyr)
+library(plyr)
+library(tidyr)
+library(plotly)
+library(tidyverse)
+library(tidyselect)
+library(data.table)
+library(readxl)
+library(fBasics)
+```
+
+####load data
+
+
+```{r, message=FALSE, warning=FALSE}
+#Reading the dataset from my Github repository
+crime_data <- read_csv("https://raw.githubusercontent.com/igukusamuel/DATA-607-Final-Project/master/CrimeData.csv")
+
+#Observing the dataset
+
+#glimpse(crime_data)
+#str(crime_data)
+#summary(crime_data)
+
+
+#Confirm data was loaded correctly
+head(crime_data, 2)
 
 ```
 
 
-#Data Transformation and Clean-up
 
-```{r}
-crime_data <- crime_data[3:28, 1:20]
- 
-head(crime_data)
-
-colNames <- crime_data[1,]
-colNames
-
-colnames(crime_data) <- colNames
-head(crime_data)
- 
-crime_data <- crime_data[-1,]
- 
-crime_data <- as_tibble(crime_data)
- 
-head(crime_data)
-
-```
-
-
-#ÔÅØ Project includes data from at least two different types of data sources
+# Project includes data from at least two different types of data sources
 (e.g., two or more of these: relational or CSV, Neo4J, web page [scraped or API], MongoDB, etc.)
 
 
-#ÔÅØ Project includes at least one data transformation operation.
+# Project includes at least one data transformation operation.
 [Examples: transforming from wide to long; converting columns to date format]
 
 
-#ÔÅØ Project includes at least one statistical analysis and at least one graphics that describes or validates your data.
+#Data Transformation and Clean-up
+```{r, message=FALSE, warning=FALSE}
 
-```{r}
+#Select columns relevant to our analysis [1:20 only].
+#Note Column 21:24 are empty
+
+crime_data <- crime_data[, 1:20]
+
+# Add a column on % Crime Rate (Total crimes / Total Population)
+
+crime_data <- crime_data %>% mutate(PercentageCrimeRate = (
+   Violent_crime + Murder_and_nonnegligent_manslaughter +
+   Rape + Robbery + Aggravated_assault + Larceny_theft +
+   Property_crime + Burglary +
+   Motor_vehicle_theft) / Population * 100
+ )
+
+# Add a column on Average Crime Rate (Total crimes / N (no of crime classifications))
+
+crime_data %>% mutate(AverageCrimeRate = (
+   Violent_crime_rate + Murder_and_nonnegligent_manslaughter_rate +
+   Rape_rate + Robbery_rate + Aggravated_assault_rate + Larceny_theft_rate +
+   Property_crime_rate + Burglary_rate +
+   Motor_vehicle_theft_rate) / 9
+ ) -> crime_data
+
+# Print out all column names to confirm the two just added
+names(crime_data)
+
+```
+
+
+# Project includes at least one statistical analysis and at least one graphics that describes or validates your data.
+
+#### Population size between 1994 to 2018
+
+```{r, message=FALSE, warning=FALSE}
 populationGrowth <-
-        ggplot(crime_data, aes(Year, Population, fill = Population)) + 
-        geom_bar(stat = "identity") +
-        ggtitle("Population growth between 1994 - 2018") +
+        ggplot(crime_data, aes(Year, Population, group = 1)) + 
+        geom_line(linetype = "dashed", color = "red") +
+        geom_point()+
+        ggtitle("Population Size Between 1994 - 2018") +
         xlab("Years") + ylab("Population") +
         theme(
                 plot.title = element_text(color="blue", size=15, face="bold.italic"),
                 axis.text.x = element_text(angle=60, hjust=1),
-                #axis.text.y = element_blank(),
-                #axis.ticks.y = element_blank(),
                 axis.title.x = element_text(color="blue", size=15, face="bold"),
                 axis.title.y = element_text(color="blue", size=15, face="bold")
                 )
@@ -95,76 +140,286 @@ populationGrowth <-
 ggplotly(populationGrowth)
 
 ```
+*The total population has been growing over the years from 1994 to 2018. We note a sharp increase between the year 1999 to 2001.*
+   
+   
+## Crime Types
 
-```{r}
+### 1. Violent Crimes
+
+```{r, message=FALSE, warning=FALSE}
 ViolentCrimeRate <-
-   ggplot(crime_data, aes(Year, Violent_crime, fill = Violent_crime)) + 
-   geom_bar(stat = "identity") +
-   ggtitle("Violent_crime growth between 1994 - 2018") +
+   ggplot(crime_data, aes(Year, Violent_crime_rate, group = 1)) + 
+   geom_line(linetype = "dashed", color = "red") +
+        geom_point()+
+   ggtitle("Violent crime rate per 100,000 between 1994 - 2018") +
    xlab("Years") + ylab("Violent_crime") +
    theme(
      plot.title = element_text(color="blue", size=15, face="bold.italic"),
      axis.text.x = element_text(angle=60, hjust=1),
-     #axis.text.y = element_blank(),
-     #axis.ticks.y = element_blank(),
      axis.title.x = element_text(color="blue", size=15, face="bold"),
      axis.title.y = element_text(color="blue", size=15, face="bold")
    )
  
 ggplotly(ViolentCrimeRate)
+
+```
+*The Violent crime rate per 100,000 between 1994 - 2018 has been decreasing over the years.*
+   
+### 2. Murder_and_nonnegligent_manslaughter
+
+```{r, message=FALSE, warning=FALSE}
+Murder_and_nonnegligent_manslaughter_rate <-
+   ggplot(crime_data, aes(Year, Murder_and_nonnegligent_manslaughter_rate, group = 1)) + 
+   geom_line(linetype = "dashed", color = "red") +
+        geom_point()+
+   ggtitle("Rape Rate per 100,000 between 1994 - 2018") +
+   xlab("Years") + ylab("Rate_rate") +
+   theme(
+     plot.title = element_text(color="blue", size=15, face="bold.italic"),
+     axis.text.x = element_text(angle=60, hjust=1),
+     axis.title.x = element_text(color="blue", size=15, face="bold"),
+     axis.title.y = element_text(color="blue", size=15, face="bold")
+   )
  
-names(crime_data)
+ggplotly(Murder_and_nonnegligent_manslaughter_rate)
 
 ```
-```{r}
+*The Murder_and_nonnegligent_manslaughter_rate per 100,000 has been decreasing over the years between 1994 - 2018 with a small increment between 2014 to 2016.*
+*There after the rate decrease.*
+   
+### 3. Rape
 
-crime_data %>% mutate(OverallCrimeRate = (
-   Violent_crime_rate + Murder_and_nonnegligent_manslaughter_rate +
-   Rape_rate + Robbery_rate + Aggravated_assault_rate +
-   Property_crime_rate + Burglary_rate + Larceny-theft_rate +
-   Motor_vehicle_theft_rate) / 9
- ) -> crimeData
+```{r, message=FALSE, warning=FALSE}
+Rape_rate <-
+   ggplot(crime_data, aes(Year, Rape_rate, group = 1)) + 
+   geom_line(linetype = "dashed", color = "red") +
+        geom_point()+
+   ggtitle("Rape Rate per 100,000 between 1994 - 2018") +
+   xlab("Years") + ylab("Rate_rate") +
+   theme(
+     plot.title = element_text(color="blue", size=15, face="bold.italic"),
+     axis.text.x = element_text(angle=60, hjust=1),
+     axis.title.x = element_text(color="blue", size=15, face="bold"),
+     axis.title.y = element_text(color="blue", size=15, face="bold")
+   )
+ 
+ggplotly(Rape_rate)
+
+```
+*The Rape Rate per 100,000 had been decreasing over the years from 1994 - 2013 before steadily increasing to the year 2018.*
+   
+
+### 4. Robberly
+
+```{r, message=FALSE, warning=FALSE}
+Robbery_rate <-
+   ggplot(crime_data, aes(Year, Robbery_rate, group = 1)) + 
+   geom_line(linetype = "dashed", color = "red") +
+        geom_point()+
+   ggtitle("Robberly Rate per 100,000 between 1994 - 2018") +
+   xlab("Years") + ylab("Robberly_Rate") +
+   theme(
+     plot.title = element_text(color="blue", size=15, face="bold.italic"),
+     axis.text.x = element_text(angle=60, hjust=1),
+     axis.title.x = element_text(color="blue", size=15, face="bold"),
+     axis.title.y = element_text(color="blue", size=15, face="bold")
+   )
+ 
+ggplotly(Robbery_rate)
+
+```
+*The Robberly Rate per 100,000 has been decreasing over the years between 1994 - 2018.*
+   
+### 5. Aggravated Assault
+
+```{r, message=FALSE, warning=FALSE}
+Aggravated_assault_rate <-
+   ggplot(crime_data, aes(Year, Aggravated_assault_rate, group = 1)) + 
+   geom_line(linetype = "dashed", color = "red") +
+        geom_point()+
+   ggtitle("Aggrevated_Assualt per 100,000 growth between 1994 - 2018") +
+   xlab("Years") + ylab("Aggrevated_Assualt") +
+   theme(
+     plot.title = element_text(color="blue", size=15, face="bold.italic"),
+     axis.text.x = element_text(angle=60, hjust=1),
+     axis.title.x = element_text(color="blue", size=15, face="bold"),
+     axis.title.y = element_text(color="blue", size=15, face="bold")
+   )
+ 
+ggplotly(Aggravated_assault_rate)
 
 ```
 
-#ÔÅØ Project includes at least one graphic that supports your conclusion(s).
+*The Aggrevated_Assualt per 100,000 has been decreasing over the years between 1994 - 2014 with a small increment between 2014 to 2016.*
+*There after the rate decrease between 2016-2018.*
+   
+### 6. Property Crime
 
+```{r, message=FALSE, warning=FALSE}
+Property_crime_rate <-
+   ggplot(crime_data, aes(Year, Property_crime_rate, group = 1)) + 
+   geom_line(linetype = "dashed", color = "red") +
+        geom_point()+
+   ggtitle("Property Crime per 100,000 between 1994 - 2018") +
+   xlab("Years") + ylab("Property_crime") +
+   theme(
+     plot.title = element_text(color="blue", size=15, face="bold.italic"),
+     axis.text.x = element_text(angle=60, hjust=1),
+     axis.title.x = element_text(color="blue", size=15, face="bold"),
+     axis.title.y = element_text(color="blue", size=15, face="bold")
+   )
+ 
+ggplotly(Property_crime_rate)
 
-#ÔÅØ Project includes at least one statistical analysis that supports your conclusion(s).
+```
+*The Property Crime per 100,000 has been decreasing over the years between 1994 - 2018.*
+   
+### 7. Burglary
 
+```{r, message=FALSE, warning=FALSE}
+Burglary_rate <-
+   ggplot(crime_data, aes(Year, Burglary_rate, group = 1)) + 
+   geom_line(linetype = "dashed", color = "red") +
+        geom_point()+
+   ggtitle("Burglary Rate per 100,000 between 1994 - 2018") +
+   xlab("Years") + ylab("Burglary_Rate") +
+   theme(
+     plot.title = element_text(color="blue", size=15, face="bold.italic"),
+     axis.text.x = element_text(angle=60, hjust=1),
+     axis.title.x = element_text(color="blue", size=15, face="bold"),
+     axis.title.y = element_text(color="blue", size=15, face="bold")
+   )
+ 
+ggplotly(Burglary_rate)
 
+```
+*The Burglary Rate per 100,000 has been decreasing over the years between 1994 - 2018.*
+   
+### 8. Larcency theft
 
+```{r, message=FALSE, warning=FALSE}
+Larceny_theft_rate <-
+   ggplot(crime_data, aes(Year, Larceny_theft_rate, group = 1)) + 
+   geom_line(linetype = "dashed", color = "red") +
+        geom_point()+
+   ggtitle("Larcency theft per 100,000 between 1994 - 2018") +
+   xlab("Years") + ylab("Larcency_theft") +
+   theme(
+     plot.title = element_text(color="blue", size=15, face="bold.italic"),
+     axis.text.x = element_text(angle=60, hjust=1),
+     axis.title.x = element_text(color="blue", size=15, face="bold"),
+     axis.title.y = element_text(color="blue", size=15, face="bold")
+   )
+ 
+ggplotly(Larceny_theft_rate)
 
+```
+*The Larcency theft per 100,000 has been decreasing over the years between 1994 - 2018.*
+   
+### 9. Motor_vehicle_theft
 
+```{r, message=FALSE, warning=FALSE}
+Motor_vehicle_theft_rate <-
+   ggplot(crime_data, aes(Year, Motor_vehicle_theft_rate, group = 1)) + 
+   geom_line(linetype = "dashed", color = "red") +
+        geom_point()+
+   ggtitle("Motor_vehicle_theft per 100,000 between 1994 - 2018") +
+   xlab("Years") + ylab("Violent_crime") +
+   theme(
+     plot.title = element_text(color="blue", size=15, face="bold.italic"),
+     axis.text.x = element_text(angle=60, hjust=1),
+     axis.title.x = element_text(color="blue", size=15, face="bold"),
+     axis.title.y = element_text(color="blue", size=15, face="bold")
+   )
+ 
+ggplotly(Motor_vehicle_theft_rate)
 
+```
+*The Motor_vehicle_theft per 100,000 has been decreasing over the years between 1994 - 2018.*
+   
+## Average Crime rate per 100,000
 
+```{r, message=FALSE, warning=FALSE}
+AverageCrimeRate <-
+   ggplot(crime_data, aes(Year, AverageCrimeRate, group = 1)) + 
+   geom_line(linetype = "dashed", color = "red") +
+        geom_point()+
+   ggtitle("Average Crime Rate between 1994 - 2018") +
+   xlab("Years") + ylab("Violent_crime") +
+   theme(
+     plot.title = element_text(color="blue", size=15, face="bold.italic"),
+     axis.text.x = element_text(angle=60, hjust=1),
+     axis.title.x = element_text(color="blue", size=15, face="bold"),
+     axis.title.y = element_text(color="blue", size=15, face="bold")
+   )
+ 
+ggplotly(AverageCrimeRate)
 
+```
 
-#ÔÅØ Project includes at least one feature that we did not cover in class!
-        There are many examples: ‚????I used ggmap; I created a decision tree; I ranked the results; I created my presentation slides directly from R; I figured out to use OAuth 2.0‚??¶‚??ù
+# Project includes at least one graphic that supports your conclusion(s).
+
+## Percentage Crime Rate between 1994 and 2018
+
+```{r, message=FALSE, warning=FALSE}
+PercentageCrimeRate <-
+   ggplot(crime_data, aes(Year, PercentageCrimeRate, group = 1)) + 
+   geom_line(linetype = "dashed", color = "red") +
+        geom_point()+
         
-#ÔÅØ Presentation. Was the presentation delivered in the allotted time (3 to 5 minutes)?
+   ggtitle("% Crime Rate between 1994 - 2018") +
+   xlab("Year") + ylab("Overall % Crime Rate") +
+   theme(
+     plot.title = element_text(color="red", size=15, face="bold.italic"),
+     axis.text.x = element_text(angle=60, hjust=1),
+     axis.title.x = element_text(color="blue", size=15, face="bold"),
+     axis.title.y = element_text(color="orange", size=15, face="bold")
+   )
+ 
+ggplotly(PercentageCrimeRate)
 
-#ÔÅØ Presentation.
-Did you show (at least) one challenge you encountered in code and/or data, and what you did when you encountered that challenge? If you didn‚????t encounter any challenges, your assignment was clearly too easy for you!
+```
 
-#ÔÅØ Presentation.
-Did the audience come away with a clear understanding of your motivation for undertaking the project?
+#Conclusion:
+The analysis above leads us to the following conclusions that the average rate of crime has decreased steadily over the period between 1994 and 2018.
+   
+   
 
-#ÔÅØ Presentation.
-Did the audience come away with a clear understanding of at least one insight you gained or conclusion you reached or hypothesis you ‚????confirmed‚??ù (rejected or failed to reject‚??¶)?
+# Project includes at least one statistical analysis that supports your conclusion(s).
 
-#ÔÅØ Code and data.
-Have you delivered the submitted code and data where it is self-contained‚????preferably in rpubs.com and github? 
-Am I able to fully reproduce your results with what you‚????ve delivered? You won‚????t receive full credit if your code references data on your local machine!
 
-#ÔÅØ Code and data.
-Does all of the delivered code run without errors?
 
-#ÔÅØ Code and data.
-Have you delivered your code and conclusions using a ‚????reproducible research‚??ù tool such as RMarkdown?
+# Project includes at least one feature that we did not cover in class!
+There are many examples: I used ggmap; I created a decision tree; I ranked the results; I created my presentation slides directly from R; I figured out to use OAuth 2.0.
+        
+        I created my presentation slides directly from R.
+        
+# Presentation.
+Was the presentation delivered in the allotted time (3 to 5 minutes)? # YES
 
-#ÔÅØ Deadline management.
-Were your draft project proposal, project, and presentation delivered on time?
+Did you show (at least) one challenge you encountered in code and/or data, and what you did when you encountered that challenge? # YES
+
+If you didn't encounter any challenges, your assignment was clearly too easy for you!
+
+Did the audience come away with a clear understanding of your motivation for undertaking the project? # YES
+
+Did the audience come away with a clear understanding of at least one insight you gained or conclusion you reached or hypothesis you confirmed (rejected or failed to reject)? # YES
+
+# Code and data.
+Have you delivered the submitted code and data where it is self-contained preferably in rpubs.com and github? # YES
+
+Am I able to fully reproduce your results with what you've delivered? # YES
+
+You won't receive full credit if your code references data on your local machine!
+
+Does all of the delivered code run without errors? # YES
+
+Have you delivered your code and conclusions using a reproducible research tool such as RMarkdown? # YES
+
+# Deadline management.
+
+Were your draft project proposal, project, and presentation delivered on time? # YES
+
 Any part of the project that is turned in late will receive a maximum grade of 80%. Please turn in your work on time!
 You are of course welcome to deliver ahead of schedule!
