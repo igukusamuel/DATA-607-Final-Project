@@ -3,45 +3,41 @@ title: "DATA 607 Final Project"
 author: "Samuel I Kigamba"
 date: "December 10, 2019"
 output:
-  html_document:
-    css:
-    highlight: pygments
-    theme: cerulean
-    toc: true
-    toc_float: true
-    code_folding: hide
-  ioslides_presentation: default
-  pdf_document: default
-  slidy_presentation: default
+  html_document: slidy_presentation
+    
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
---------------------------------------------------------------------------------
-
-\clearpage
-
 
 # SECTION ONE - INTRODUCTION
+
 
 ## Objective of this analysis.
 
 Goal:
+
 My objective in this project is seeking to understand the relationship between population growth and the crime rates in the United States between the year 1994 to 2018 and to comment and conclude on the overal pattern.
 
 
 ## Data sources.
 
- To analyze the crime rates in the US for the period from 1994 to 2018, we will use the data set provided by the FBI. 
- See link: https://ucr.fbi.gov/crime-in-the-u.s/2018/crime-in-the-u.s.-2018/tables/table-1
+To analyze the crime rates in the US for the period from 1994 to 2018, we will use the data set provided by the FBI. 
+See link: https://ucr.fbi.gov/crime-in-the-u.s/2018/crime-in-the-u.s.-2018/tables/table-1
+ 
+https://raw.githubusercontent.com/igukusamuel/DATA-607-Final-Project/master/CrimeData.csv
  
  
 # SECTION TWO - Data Acquisition
 
+
 I downloaded data for the period 1994 - 2018 and saved it as a .csv file in my local drive and later uploaded it into my github.
-DaTA: https://raw.githubusercontent.com/igukusamuel/DATA-607-Final-Project/master/CrimeData.cs
+
+
+DATA: https://raw.githubusercontent.com/igukusamuel/DATA-607-Final-Project/master/CrimeData.cs
+
 
 ## load libraries
 
@@ -61,68 +57,55 @@ library(readxl)
 library(fBasics)
 ```
 
-## load data
+--------------------------------------------------------------------------------
 
+\clearpage
+
+
+## load data
 ```{r, message=FALSE, warning=FALSE}
 #Reading the dataset from my Github repository
 crime_data <- read_csv("https://raw.githubusercontent.com/igukusamuel/DATA-607-Final-Project/master/CrimeData.csv")
 
 #To analyze the data frame in detail uncomment the following lines of code.
-
-#Observing the dataset
 #glimpse(crime_data)
 #str(crime_data)
 #summary(crime_data)
 
-#Confirm data was loaded correctly
-head(crime_data, 2)
-
+head(crime_data, 2) #Confirm data was loaded correctly
+dim(crime_data)
 ```
+
+--------------------------------------------------------------------------------
+
+\clearpage
 
 ## Data transformation and clean-up
 ```{r, message=FALSE, warning=FALSE}
-
-#Select columns relevant to our analysis [1:20 only].
-#Note Column 21:24 are empty
-
+#Select columns relevant to our analysis [1:20 only]. Note Column 21:24 are empty
 crime_data <- crime_data[, 1:20]
-
 # Add a column on % Crime Rate (Total crimes / Total Population)
-crime_data <- crime_data %>% mutate(PercentageCrimeRate = (
-   Violent_crime +
-   Property_crime) / Population * 100
- )
-
+crime_data <- crime_data %>% mutate(PercentageCrimeRate = (Violent_crime + Property_crime) / Population * 100)
 # Add a column on Average Crime Rate (Total crimes / N (no of crime classifications))
-crime_data %>% mutate(AverageCrimeRate = (
-   Violent_crime_rate + Property_crime_rate) / 2
- ) -> crime_data
-
-# Print out all column names to confirm the two just added
-names(crime_data)
-
+crime_data %>% mutate(AverageCrimeRate = (Violent_crime_rate + Property_crime_rate) / 2) -> crime_data
+names(crime_data)# Print out all column names to confirm the two just added
 ```
 
 # SECTION THREE - Data analysis
 
 ## Population size between 1994 to 2018
-
 ```{r, message=FALSE, warning=FALSE}
 populationGrowth <-
         ggplot(crime_data, aes(Year, Population, group = 1)) + 
-        geom_line(linetype = "dashed", color = "red") +
-        geom_point()+
+        geom_line(linetype = "dashed", color = "red") + geom_point()+
         ggtitle("Population Size Between 1994 - 2018") +
         xlab("Years") + ylab("Population") +
         theme(
                 plot.title = element_text(color="blue", size=15, face="bold.italic"),
                 axis.text.x = element_text(angle=60, hjust=1),
                 axis.title.x = element_text(color="blue", size=15, face="bold"),
-                axis.title.y = element_text(color="blue", size=15, face="bold")
-                )
- 
+                axis.title.y = element_text(color="blue", size=15, face="bold"))
 ggplotly(populationGrowth)
-
 ```
 *The total population has been growing over the years from 1994 to 2018. We note a sharp increase between the year 1999 to 2001.*
    
@@ -134,25 +117,18 @@ ggplotly(populationGrowth)
 
 ## Crime Types
 
-
 ### 1. Violent Crimes
-
 ```{r, message=FALSE, warning=FALSE}
 ViolentCrimeRate <-
    ggplot(crime_data, aes(Year, Violent_crime_rate, group = 1)) + 
-   geom_line(linetype = "dashed", color = "red") +
-        geom_point()+
-   ggtitle("Violent crime rate per 100,000 between 1994 - 2018") +
-   xlab("Years") + ylab("Violent_crime") +
+   geom_line(linetype = "dashed", color = "red") + geom_point()+
+   ggtitle("Violent crime rate per 100,000 between 1994 - 2018") + xlab("Years") + ylab("Violent_crime") +
    theme(
      plot.title = element_text(color="blue", size=15, face="bold.italic"),
      axis.text.x = element_text(angle=60, hjust=1),
      axis.title.x = element_text(color="blue", size=15, face="bold"),
-     axis.title.y = element_text(color="blue", size=15, face="bold")
-   )
- 
+     axis.title.y = element_text(color="blue", size=15, face="bold"))
 ggplotly(ViolentCrimeRate)
-
 ```
 *The Violent crime rate per 100,000 between 1994 - 2018 has been decreasing over the years.*
 
@@ -161,23 +137,17 @@ ggplotly(ViolentCrimeRate)
 \clearpage
 
 ### 2. Murder and manslaughter
-
 ```{r, message=FALSE, warning=FALSE}
 Murder_and_nonnegligent_manslaughter_rate <-
    ggplot(crime_data, aes(Year, Murder_and_nonnegligent_manslaughter_rate, group = 1)) + 
-   geom_line(linetype = "dashed", color = "red") +
-        geom_point()+
-   ggtitle("Rape Rate per 100,000 between 1994 - 2018") +
-   xlab("Years") + ylab("Rate_rate") +
+   geom_line(linetype = "dashed", color = "red") + geom_point()+
+   ggtitle("Rape Rate per 100,000 between 1994 - 2018") + xlab("Years") + ylab("Rate_rate") +
    theme(
      plot.title = element_text(color="blue", size=15, face="bold.italic"),
      axis.text.x = element_text(angle=60, hjust=1),
      axis.title.x = element_text(color="blue", size=15, face="bold"),
-     axis.title.y = element_text(color="blue", size=15, face="bold")
-   )
- 
+     axis.title.y = element_text(color="blue", size=15, face="bold"))
 ggplotly(Murder_and_nonnegligent_manslaughter_rate)
-
 ```
 *The Murder_and_nonnegligent_manslaughter_rate per 100,000 has been decreasing over the years between 1994 - 2018 with a small increment between 2014 to 2016.*
 *There after the rate decrease.*
@@ -187,26 +157,18 @@ ggplotly(Murder_and_nonnegligent_manslaughter_rate)
 
 \clearpage
 
-
-
 ### 3. Rape
-
 ```{r, message=FALSE, warning=FALSE}
 Rape_rate <-
    ggplot(crime_data, aes(Year, Rape_rate, group = 1)) + 
-   geom_line(linetype = "dashed", color = "red") +
-        geom_point()+
-   ggtitle("Rape Rate per 100,000 between 1994 - 2018") +
-   xlab("Years") + ylab("Rate_rate") +
+   geom_line(linetype = "dashed", color = "red") + geom_point()+
+   ggtitle("Rape Rate per 100,000 between 1994 - 2018") + xlab("Years") + ylab("Rate_rate") +
    theme(
      plot.title = element_text(color="blue", size=15, face="bold.italic"),
      axis.text.x = element_text(angle=60, hjust=1),
      axis.title.x = element_text(color="blue", size=15, face="bold"),
-     axis.title.y = element_text(color="blue", size=15, face="bold")
-   )
- 
+     axis.title.y = element_text(color="blue", size=15, face="bold"))
 ggplotly(Rape_rate)
-
 ```
 *The Rape Rate per 100,000 had been decreasing over the years from 1994 - 2013 before steadily increasing to the year 2018.*
 
@@ -216,23 +178,17 @@ ggplotly(Rape_rate)
 
 
 ### 4. Robberly
-
 ```{r, message=FALSE, warning=FALSE}
 Robbery_rate <-
    ggplot(crime_data, aes(Year, Robbery_rate, group = 1)) + 
-   geom_line(linetype = "dashed", color = "red") +
-        geom_point()+
-   ggtitle("Robberly Rate per 100,000 between 1994 - 2018") +
-   xlab("Years") + ylab("Robberly_Rate") +
+   geom_line(linetype = "dashed", color = "red") + geom_point()+
+   ggtitle("Robberly Rate per 100,000 between 1994 - 2018") + xlab("Years") + ylab("Robberly_Rate") +
    theme(
      plot.title = element_text(color="blue", size=15, face="bold.italic"),
      axis.text.x = element_text(angle=60, hjust=1),
      axis.title.x = element_text(color="blue", size=15, face="bold"),
-     axis.title.y = element_text(color="blue", size=15, face="bold")
-   )
- 
+     axis.title.y = element_text(color="blue", size=15, face="bold"))
 ggplotly(Robbery_rate)
-
 ```
 *The Robberly Rate per 100,000 has been decreasing over the years between 1994 - 2018.*
 
@@ -241,25 +197,18 @@ ggplotly(Robbery_rate)
 \clearpage
 
 ### 5. Aggravated Assault
-
 ```{r, message=FALSE, warning=FALSE}
 Aggravated_assault_rate <-
    ggplot(crime_data, aes(Year, Aggravated_assault_rate, group = 1)) + 
-   geom_line(linetype = "dashed", color = "red") +
-        geom_point()+
-   ggtitle("Aggrevated_Assualt per 100,000 growth between 1994 - 2018") +
-   xlab("Years") + ylab("Aggrevated_Assualt") +
+   geom_line(linetype = "dashed", color = "red") + geom_point()+
+   ggtitle("Aggrevated_Assualt per 100,000 growth between 1994 - 2018") + xlab("Years") + ylab("Aggrevated_Assualt") +
    theme(
      plot.title = element_text(color="blue", size=15, face="bold.italic"),
      axis.text.x = element_text(angle=60, hjust=1),
      axis.title.x = element_text(color="blue", size=15, face="bold"),
-     axis.title.y = element_text(color="blue", size=15, face="bold")
-   )
- 
+     axis.title.y = element_text(color="blue", size=15, face="bold"))
 ggplotly(Aggravated_assault_rate)
-
 ```
-
 *The Aggrevated_Assualt per 100,000 has been decreasing over the years between 1994 - 2014 with a small increment between 2014 to 2016.*
 *There after the rate decrease between 2016-2018.*
 
@@ -268,23 +217,17 @@ ggplotly(Aggravated_assault_rate)
 \clearpage
 
 ### 6. Property Crime
-
 ```{r, message=FALSE, warning=FALSE}
 Property_crime_rate <-
    ggplot(crime_data, aes(Year, Property_crime_rate, group = 1)) + 
-   geom_line(linetype = "dashed", color = "red") +
-        geom_point()+
-   ggtitle("Property Crime per 100,000 between 1994 - 2018") +
-   xlab("Years") + ylab("Property_crime") +
+   geom_line(linetype = "dashed", color = "red") +  geom_point()+
+   ggtitle("Property Crime per 100,000 between 1994 - 2018") + xlab("Years") + ylab("Property_crime") +
    theme(
      plot.title = element_text(color="blue", size=15, face="bold.italic"),
      axis.text.x = element_text(angle=60, hjust=1),
      axis.title.x = element_text(color="blue", size=15, face="bold"),
-     axis.title.y = element_text(color="blue", size=15, face="bold")
-   )
- 
+     axis.title.y = element_text(color="blue", size=15, face="bold"))
 ggplotly(Property_crime_rate)
-
 ```
 *The Property Crime per 100,000 has been decreasing over the years between 1994 - 2018.*
 
@@ -293,23 +236,17 @@ ggplotly(Property_crime_rate)
 \clearpage
 
 ### 7. Burglary
-
 ```{r, message=FALSE, warning=FALSE}
 Burglary_rate <-
    ggplot(crime_data, aes(Year, Burglary_rate, group = 1)) + 
-   geom_line(linetype = "dashed", color = "red") +
-        geom_point()+
-   ggtitle("Burglary Rate per 100,000 between 1994 - 2018") +
-   xlab("Years") + ylab("Burglary_Rate") +
+   geom_line(linetype = "dashed", color = "red") +  geom_point()+
+   ggtitle("Burglary Rate per 100,000 between 1994 - 2018") + xlab("Years") + ylab("Burglary_Rate") +
    theme(
      plot.title = element_text(color="blue", size=15, face="bold.italic"),
      axis.text.x = element_text(angle=60, hjust=1),
      axis.title.x = element_text(color="blue", size=15, face="bold"),
-     axis.title.y = element_text(color="blue", size=15, face="bold")
-   )
- 
+     axis.title.y = element_text(color="blue", size=15, face="bold"))
 ggplotly(Burglary_rate)
-
 ```
 *The Burglary Rate per 100,000 has been decreasing over the years between 1994 - 2018.*
 
@@ -320,23 +257,17 @@ ggplotly(Burglary_rate)
 
 
 ### 8. Larcency theft
-
 ```{r, message=FALSE, warning=FALSE}
 Larceny_theft_rate <-
    ggplot(crime_data, aes(Year, Larceny_theft_rate, group = 1)) + 
-   geom_line(linetype = "dashed", color = "red") +
-        geom_point()+
-   ggtitle("Larcency theft per 100,000 between 1994 - 2018") +
-   xlab("Years") + ylab("Larcency_theft") +
+   geom_line(linetype = "dashed", color = "red") +  geom_point()+
+   ggtitle("Larcency theft per 100,000 between 1994 - 2018") + xlab("Years") + ylab("Larcency_theft") +
    theme(
      plot.title = element_text(color="blue", size=15, face="bold.italic"),
      axis.text.x = element_text(angle=60, hjust=1),
      axis.title.x = element_text(color="blue", size=15, face="bold"),
-     axis.title.y = element_text(color="blue", size=15, face="bold")
-   )
- 
+     axis.title.y = element_text(color="blue", size=15, face="bold"))
 ggplotly(Larceny_theft_rate)
-
 ```
 *The Larcency theft per 100,000 has been decreasing over the years between 1994 - 2018.*
 
@@ -345,23 +276,17 @@ ggplotly(Larceny_theft_rate)
 \clearpage
 
 ### 9. Motor_vehicle_theft
-
 ```{r, message=FALSE, warning=FALSE}
 Motor_vehicle_theft_rate <-
    ggplot(crime_data, aes(Year, Motor_vehicle_theft_rate, group = 1)) + 
-   geom_line(linetype = "dashed", color = "red") +
-        geom_point()+
-   ggtitle("Motor_vehicle_theft per 100,000 between 1994 - 2018") +
-   xlab("Years") + ylab("Violent_crime") +
+   geom_line(linetype = "dashed", color = "red") +  geom_point()+
+   ggtitle("Motor_vehicle_theft per 100,000 between 1994 - 2018") + xlab("Years") + ylab("Violent_crime") +
    theme(
      plot.title = element_text(color="blue", size=15, face="bold.italic"),
      axis.text.x = element_text(angle=60, hjust=1),
      axis.title.x = element_text(color="blue", size=15, face="bold"),
-     axis.title.y = element_text(color="blue", size=15, face="bold")
-   )
- 
+     axis.title.y = element_text(color="blue", size=15, face="bold"))
 ggplotly(Motor_vehicle_theft_rate)
-
 ```
 *The Motor_vehicle_theft per 100,000 has been decreasing over the years between 1994 - 2018.*
 
@@ -371,27 +296,20 @@ ggplotly(Motor_vehicle_theft_rate)
 \clearpage
 
 
-
 ## Overall Crime Rate
 
 ### 1. Average Crime
-
 ```{r, message=FALSE, warning=FALSE}
 AverageCrimeRate <-
    ggplot(crime_data, aes(Year, AverageCrimeRate, group = 1)) + 
-   geom_line(linetype = "dashed", color = "red") +
-        geom_point()+
-   ggtitle("Average Crime Rate per 100,000 between 1994 - 2018") +
-   xlab("Years") + ylab("Violent_crime") +
+   geom_line(linetype = "dashed", color = "red") +  geom_point()+
+   ggtitle("Average Crime Rate per 100,000 between 1994 - 2018") + xlab("Years") + ylab("Violent_crime") +
    theme(
      plot.title = element_text(color="blue", size=15, face="bold.italic"),
      axis.text.x = element_text(angle=60, hjust=1),
      axis.title.x = element_text(color="blue", size=15, face="bold"),
-     axis.title.y = element_text(color="blue", size=15, face="bold")
-   )
- 
+     axis.title.y = element_text(color="blue", size=15, face="bold"))
 ggplotly(AverageCrimeRate)
-
 ```
 
 
@@ -401,51 +319,40 @@ ggplotly(AverageCrimeRate)
 
 
 ### 2. Percentage Crime Rate
-
 ```{r, message=FALSE, warning=FALSE}
 PercentageCrimeRate <-
    ggplot(crime_data, aes(Year, PercentageCrimeRate, group = 1)) + 
-   geom_line(linetype = "dashed", color = "red") +
-        geom_point()+
-        
-   ggtitle("% Crime Rate between 1994 - 2018") +
-   xlab("Year") + ylab("Overall % Crime Rate") +
+   geom_line(linetype = "dashed", color = "red") +  geom_point()+
+   ggtitle("% Crime Rate between 1994 - 2018") + xlab("Year") + ylab("Overall % Crime Rate") +
    theme(
      plot.title = element_text(color="red", size=15, face="bold.italic"),
      axis.text.x = element_text(angle=60, hjust=1),
      axis.title.x = element_text(color="blue", size=15, face="bold"),
-     axis.title.y = element_text(color="orange", size=15, face="bold")
-   )
- 
+     axis.title.y = element_text(color="orange", size=15, face="bold"))
 ggplotly(PercentageCrimeRate)
-
 ```
 
 
---------------------------------------------------------------------------------
-
-\clearpage
-
-
-# SECTION FIVE - Statistical Analysis:
+# SECTION FOUR - Statistical Analysis:
 
 ### TEST: Population vs PercentageCrimeRate
 
-#### In this section we will create a linear regression model to see if there exists a strong relationship between population and PercentageCrimeRate
+*In this section we will create a linear regression model to see if there exists a strong relationship between population and PercentageCrimeRate*
 
-#### We create a function to calculate the correlation between population and PercentageCrimeRate
+*We create a function to calculate the correlation between population and PercentageCrimeRate*
 ```{r, message=FALSE, warning=FALSE}
 findCorrelation <- function() {
   x = crime_data$PercentageCrimeRate
   y = crime_data$Population
   corr = round(cor(x, y),4)
   print (paste0("Correlation = ",corr))
-  return (corr)
-}
-
+  return (corr)}
 c = findCorrelation()
-
 ```
+
+--------------------------------------------------------------------------------
+
+\clearpage
 
 #### We create a function for Linear Model
 ```{r, message=FALSE, warning=FALSE}
@@ -491,6 +398,11 @@ ggplotly(plot)
 #### There is a negative relationship between population increase and the rate of crime.
 
 
+--------------------------------------------------------------------------------
+
+\clearpage
+
+
 ### Regression Statistics
 
 *Linear Regression Equation:*
@@ -514,12 +426,8 @@ ggplotly(plot)
 
 Here the multiple R value is 0.9694 which shows that there is significant correlation between PercentageCrimeRate and Population. Also the value of R square is 0.968 which shows the extent to which the PercentageCrimeRate affects the Population. Therefore, we reject the null hypothesis H_0 and accept the Alternative hypothesis H_A.
 
---------------------------------------------------------------------------------
 
-\clearpage
-
-
-# SECTION FOUR - Conclusion:
+# SECTION FIVE - Conclusion:
 
 ### Conclusion
 The analysis above leads us to the following conclusions that the average rate of crime has decreased steadily over the period between 1994 and 2018.
@@ -543,8 +451,6 @@ https://github.com/igukusamuel/DATA-607-Final-Project/blob/master/DATA-607-Final
 https://ucr.fbi.gov/crime-in-the-u.s
 
 https://bookdown.org/yihui/rmarkdown/slidy-presentation.html
-
-http://rpubs.com/igukusamuel/558589
 
 --------------------------------------------------------------------------------
 
